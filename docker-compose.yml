@@ -1,6 +1,14 @@
 version: "3"
 
 networks:
+  host:
+    driver: macvlan
+    driver_opts:
+      parent: eth0
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24            # <-- Update
+          gateway: 192.168.10.1              # <-- Update
   private_network:
     ipam:
       driver: default
@@ -9,7 +17,7 @@ networks:
 
 services:
   unbound:
-    image: "mvance/unbound:latest"
+    image: "mvance/unbound-rpi:latest"
     container_name: unbound
     restart: unless-stopped
     hostname: "unbound"
@@ -29,13 +37,13 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=America/Los_Angeles # Change to your timezone
+      - TZ=Europe/Warsaw              # <-- Update
       - SERVERPORT=51820
       #- SERVERURL=my.ddns.net #optional - For use with DDNS (Uncomment to use)
       - PEERS=1 # How many peers to generate for you (clients)
       - PEERDNS=10.2.0.100 # Set it to point to pihole
       - INTERNAL_SUBNET=10.6.0.0
-      
+
     volumes:
       - ./wireguard:/config
       - /lib/modules:/lib/modules
@@ -62,7 +70,7 @@ services:
       - 127.0.0.1
       - 10.2.0.200 # Points to unbound
     environment:
-      TZ: "America/Los_Angeles"
+      TZ: "Europe/Warsaw"              # <-- Update
       WEBPASSWORD: "" # Blank password - Can be whatever you want.
       ServerIP: 10.1.0.100 # Internal IP of pihole
       DNS1: 10.2.0.200 # Unbound IP
@@ -76,5 +84,7 @@ services:
     cap_add:
       - NET_ADMIN
     networks:
+      host:
+       ipv4_address: 192.168.10.19              # <-- Update
       private_network:
         ipv4_address: 10.2.0.100
